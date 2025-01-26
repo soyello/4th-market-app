@@ -38,6 +38,7 @@ const Input = <T extends FieldValues>({
         pt-6
         font-light
         bg-white
+        border-2
         rounded-md
         outline-none
         transition
