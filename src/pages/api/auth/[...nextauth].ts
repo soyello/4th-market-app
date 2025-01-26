@@ -1,8 +1,9 @@
 import { RowDataPacket } from 'mysql2';
 import { NextAuthOptions, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import pool from '../../../lib/db';
+import bcrypt from 'bcryptjs';
 import NextAuth from 'next-auth/next';
+import MySQLAdapter from '@/lib/mysqlAdapter';
 
 interface UserRows extends RowDataPacket {
   id: string;
@@ -21,33 +22,20 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        const hardcodedUser = {
-          id: '곶감',
-          name: '정재연',
-          email: 'hello@good.com',
-          hashedPassword: '12345',
-          role: 'User',
-        };
         if (!credentials) {
           console.warn('credentials must be required.');
           return null;
         }
-        if (credentials.email === hardcodedUser.email && credentials.password === hardcodedUser.hashedPassword) {
-          return hardcodedUser as User;
-        }
-        const [rows] = await pool.query<UserRows[]>(
-          'SELECT id, name, email, hashed_password, user_type FROM users WHERE email = ?',
-          [credentials.email]
-        );
-        const user = rows[0];
 
-        if (user && user.hashed_password === credentials.password) {
+        const user = await MySQLAdapter.getUser(credentials.email);
+
+        if (user && (await bcrypt.compare(credentials.password, user.hashedPassword))) {
           return {
             id: user.id,
             name: user.name,
             email: user.email,
-            hashedPassword: user.hahshed_password,
-            role: user.user_type,
+            hashedPassword: user.hashedPassword,
+            role: user.role,
           };
         }
         return null;
