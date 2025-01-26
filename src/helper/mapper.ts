@@ -14,6 +14,7 @@ export const mapToAdapterUser = (row: UserRow): AdapterUser => ({
   image: row.image ?? null,
   hashedPassword: row.hashed_password,
   emailVerified: row.email_verified ?? null,
+  role: row.user_type,
 });
 
 export const mapToAdapterSession = (row: SessionRow): AdapterSession => ({
