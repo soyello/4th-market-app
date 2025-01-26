@@ -47,6 +47,8 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             hashedPassword: user.hashedPassword,
             role: user.role,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
           };
         }
         return null;

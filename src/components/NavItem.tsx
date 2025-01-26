@@ -1,4 +1,4 @@
-import { useSession } from 'next-auth/react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import React from 'react';
 
@@ -14,8 +14,8 @@ const NavItem = ({ mobile }: { mobile?: boolean }) => {
     { href: '/admin', label: 'Admin', type: 'link' },
     { href: '/user', label: 'User', type: 'link' },
     session?.user
-      ? { label: 'SignOut', type: 'button', onClick: () => console.log('bye') }
-      : { label: 'SignIn', type: 'button', onClick: () => console.log('hello') },
+      ? { label: 'SignOut', type: 'button', onClick: () => signOut() }
+      : { label: 'SignIn', type: 'button', onClick: () => signIn() },
   ];
   return (
     <ul className={`flex items-center justify-center gap-4 text-md w-full ${mobile && 'flex-col h-full'}`}>
