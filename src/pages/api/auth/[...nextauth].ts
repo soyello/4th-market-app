@@ -7,6 +7,7 @@ import NextAuth from 'next-auth/next';
 declare module 'next-auth' {
   interface User {
     id: string;
+    hashedPassword: string;
   }
   interface Session {
     user: User;
@@ -20,7 +21,7 @@ interface UserRows extends RowDataPacket {
   id: string;
   name: string;
   email: string;
-  hahshed_password?: string;
+  hahshed_password: string;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -37,13 +38,13 @@ export const authOptions: NextAuthOptions = {
           id: '곶감',
           name: '정재연',
           email: 'hello@good.com',
-          hashed_password: '12345',
+          hashedPassword: '12345',
         };
         if (!credentials) {
           console.warn('credentials must be required.');
-          throw new Error('credentials must be required.');
+          return null;
         }
-        if (credentials.email === hardcodedUser.email && credentials.password === hardcodedUser.hashed_password) {
+        if (credentials.email === hardcodedUser.email && credentials.password === hardcodedUser.hashedPassword) {
           return hardcodedUser as User;
         }
         const [rows] = await pool.query<UserRows[]>(
@@ -52,15 +53,15 @@ export const authOptions: NextAuthOptions = {
         );
         const user = rows[0];
 
-        if (user && user.hahshed_password) {
+        if (user && user.hashed_password === credentials.password) {
           return {
             id: user.id,
             name: user.name,
             email: user.email,
+            hashedPassword: user.hahshed_password,
           };
-        } else {
-          return null;
         }
+        return null;
       },
     }),
   ],
