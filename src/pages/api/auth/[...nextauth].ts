@@ -22,14 +22,25 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials) {
+        if (!credentials?.email || !credentials?.password) {
           console.warn('credentials must be required.');
           return null;
         }
 
+        console.log('credentials.email', credentials.email);
+
         const user = await MySQLAdapter.getUser(credentials.email);
 
-        if (user && (await bcrypt.compare(credentials.password, user.hashedPassword))) {
+        console.log('야!!!!!!!!', user);
+
+        if (!user) {
+          console.log('회원가입이력이 없습니다.');
+          throw new Error('No user found with this email.');
+        }
+
+        const isCorrectPassword = await bcrypt.compare(credentials.password, user.hashedPassword);
+
+        if (user && isCorrectPassword) {
           return {
             id: user.id,
             name: user.name,

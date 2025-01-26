@@ -15,9 +15,10 @@ const MySQLAdapter = {
     }
     try {
       const [rows] = await pool.query<UserRow[]>(
-        'SELECT id, name, email, image, email_verified, hashed_password, user_type, created_at, updated_at FROM users WHERE id = ?',
+        'SELECT id, name, email, image, email_verified, hashed_password, user_type, created_at, updated_at FROM users WHERE email = ?',
         [email]
       );
+      console.log('뭔데뭔데', rows[0]);
       return rows[0] ? mapToAdapterUser(rows[0]) : null;
     } catch (error) {
       console.error('Error fetching user by Email:', error);
