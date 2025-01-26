@@ -12,3 +12,9 @@ export interface UserRow extends BaseRow {
   hashed_password: string;
   email_verified: Date | null;
 }
+
+export interface SessionRow extends RowDataPacket {
+  session_token: string;
+  user_id: string;
+  expires: Date;
+}
