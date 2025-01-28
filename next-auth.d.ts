@@ -8,7 +8,7 @@ declare module 'next-auth' {
     role: string;
     createdAt: Date;
     updatedAt: Date | null;
-    hashedPassword: string;
+    hashedPassword?: string;
   }
   interface JWT {
     id: string;

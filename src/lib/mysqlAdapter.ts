@@ -18,7 +18,7 @@ const MySQLAdapter = {
         'SELECT id, name, email, image, email_verified, hashed_password, user_type, created_at, updated_at FROM users WHERE email = ?',
         [email]
       );
-      console.log('뭔데뭔데', rows[0]);
+
       return rows[0] ? mapToAdapterUser(rows[0]) : null;
     } catch (error) {
       console.error('Error fetching user by Email:', error);
@@ -39,10 +39,9 @@ const MySQLAdapter = {
       email,
       image: null,
       role: 'User',
-      hashedPassword,
       emailVerified: null,
       createdAt: new Date(),
-      updatedAt: new Date(),
+      updatedAt: null,
     };
   },
   async updateUser(user: Nullable<AdapterUser> & { email: string }): Promise<AdapterUser> {

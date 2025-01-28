@@ -5,13 +5,6 @@ import bcrypt from 'bcryptjs';
 import NextAuth from 'next-auth/next';
 import MySQLAdapter from '@/lib/mysqlAdapter';
 
-interface UserRows extends RowDataPacket {
-  id: string;
-  name: string;
-  email: string;
-  hahshed_password: string;
-}
-
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
@@ -27,31 +20,31 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        console.log('credentials.email', credentials.email);
-
         const user = await MySQLAdapter.getUser(credentials.email);
-
-        console.log('야!!!!!!!!', user);
 
         if (!user) {
           console.log('회원가입이력이 없습니다.');
           throw new Error('No user found with this email.');
         }
 
-        const isCorrectPassword = await bcrypt.compare(credentials.password, user.hashedPassword);
+        if (user.hashedPassword) {
+          const isCorrectPassword = await bcrypt.compare(credentials.password, user.hashedPassword);
 
-        if (user && isCorrectPassword) {
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            hashedPassword: user.hashedPassword,
-            role: user.role,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-          };
+          if (isCorrectPassword) {
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              createdAt: user.createdAt,
+              updatedAt: user.updatedAt,
+            };
+          } else {
+            throw new Error('Incorrect password.');
+          }
+        } else {
+          throw new Error('Hashed password is undefined.');
         }
-        return null;
       },
     }),
   ],
