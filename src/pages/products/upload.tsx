@@ -5,11 +5,23 @@ import ImageUpload from '@/components/ImageUpload';
 import Input from '@/components/Input';
 import { categories } from '@/components/categories/Categories';
 import CategoryInput from '@/components/categories/CategoryInput';
-import React, { useState } from 'react';
+import axios from 'axios';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 
-const ProductUploadPage = () => {
+const ProductUploadPage = ({ isKakaoLoaded }: { isKakaoLoaded: boolean }) => {
+  const router = useRouter();
+  const [shouldRenderMap, setShouldRenderMap] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isKakaoLoaded) {
+      setShouldRenderMap(true);
+    }
+  }, [isKakaoLoaded]);
+
   const {
     register,
     handleSubmit,
@@ -22,8 +34,8 @@ const ProductUploadPage = () => {
       title: '',
       description: '',
       category: '',
-      latitude: 33.5563,
-      longitude: 126.79581,
+      latitude: 37.5665,
+      longitude: 126.978,
       imageSrc: '',
       price: 10000,
     },
@@ -31,7 +43,25 @@ const ProductUploadPage = () => {
   const imageSrc = watch('imageSrc');
   const category = watch('category');
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {};
+  const latitude = watch('latitude');
+  const longitude = watch('longitude');
+
+  const KakaoMap = dynamic(() => import('../../components/KakaoMap'), { ssr: false });
+
+  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+    setIsLoading(true);
+    axios
+      .post('/api/products', data)
+      .then((response) => {
+        router.push(`/products/${response.data.id}`);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
   const setCustomValue = (id: string, value: any) => {
     setValue(id, value);
   };
@@ -42,6 +72,15 @@ const ProductUploadPage = () => {
           <Heading title='Product Upload' subtitle='upload your product' />
           <ImageUpload onChange={(value) => setCustomValue('imageSrc', value)} value={imageSrc} />
           <Input id='title' label='Title' disabled={isLoading} register={register} errors={errors} required />
+          <hr />
+          <Input
+            id='description'
+            label='Description'
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+            required
+          />
           <hr />
           <Input
             id='price'
@@ -66,7 +105,11 @@ const ProductUploadPage = () => {
             ))}
           </div>
           <hr />
-          KakaoMap
+          {shouldRenderMap ? (
+            <KakaoMap setCustomValue={setCustomValue} latitude={latitude} longitude={longitude} />
+          ) : (
+            <p>Loading kakao Maps</p>
+          )}
           <Button label='상품 생성하기' />
         </form>
       </div>

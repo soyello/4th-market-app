@@ -2,6 +2,7 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import NavItem from './NavItem';
 import { AdapterUser } from 'next-auth/adapters';
+import axios from 'axios';
 
 const Navbar = () => {
   const [menu, setMenu] = useState(false);
@@ -10,13 +11,8 @@ const Navbar = () => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await fetch('/api/currentUser');
-        if (response.ok) {
-          const user = await response.json();
-          setCurrentUser(user);
-        } else {
-          console.warn('Failed to fetch user.', response.statusText);
-        }
+        const response = await axios.get('/api/currentUser');
+        setCurrentUser(response.data);
       } catch (error) {
         console.error('Failed to fetch user:', error);
       }
