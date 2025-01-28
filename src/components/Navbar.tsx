@@ -15,7 +15,7 @@ const Navbar = () => {
           const user = await response.json();
           setCurrentUser(user);
         } else {
-          console.warn('Failed to fetch user:', response.statusText);
+          console.warn('Failed to fetch user.', response.statusText);
         }
       } catch (error) {
         console.error('Failed to fetch user:', error);
@@ -23,6 +23,7 @@ const Navbar = () => {
     };
     fetchCurrentUser();
   }, []);
+
   const handleMenu = () => {
     setMenu(!menu);
   };

@@ -1,18 +1,18 @@
 import { GetServerSideProps } from 'next';
-import { getServerSession } from 'next-auth';
 import React from 'react';
-import { authOptions } from './api/auth/[...nextauth]';
 import getCurrentUser from '@/lib/getCurrentUser';
-import { serializedUser } from '@/helper/serialization';
 import { AdapterUser } from 'next-auth/adapters';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    const { res, req } = context;
-    const session = await getServerSession(req, res, authOptions);
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
-    console.log('session', session);
-    if (!session?.user?.email) {
+    const response = await fetch(`${baseUrl}/api/currentUser`, {
+      headers: {
+        cookie: context.req.headers.cookie || '',
+      },
+    });
+    if (response.status === 401) {
       return {
         redirect: {
           destination: '/auth/login',
@@ -20,11 +20,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
       };
     }
-    const currentUser = await getCurrentUser(session.user.email);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user: ${response.statusText}`);
+    }
+
+    const currentUser = await response.json();
+
+    console.log('hello', currentUser);
 
     return {
       props: {
-        currentUser: currentUser ? serializedUser(currentUser) : null,
+        currentUser: currentUser,
       },
     };
   } catch (error) {
@@ -39,7 +46,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 const UserPage = ({ currentUser }: { currentUser: AdapterUser }) => {
-  return <div>나는 행복한 고구마</div>;
+  return (
+    <div>
+      <h1>Welcome. {currentUser.name}</h1>
+    </div>
+  );
 };
 
 export default UserPage;
